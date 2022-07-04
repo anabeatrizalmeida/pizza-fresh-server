@@ -6,6 +6,9 @@ import { UpdateTableDto } from './dto/update-table.dto';
 
 @Injectable()
 export class TableService {
+  async delete(id: string) {
+    await this.prisma.table.delete({ where: { id } })
+  }
   update(id: string, dto: UpdateTableDto): Promise<Table> {
     const data: Partial<Table> = { ...dto };
 
