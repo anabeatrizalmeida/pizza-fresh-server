@@ -2,13 +2,13 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
-  UnprocessableEntityException,
 } from '@nestjs/common';
+import * as bcrypt from 'bcrypt';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { handleError } from 'src/utils/handle-error.util';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
-import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
@@ -49,7 +49,7 @@ export class UserService {
 
   async create(dto: CreateUserDto): Promise<User> {
     if (dto.password != dto.confirmPassword) {
-      throw new BadRequestException('The passwords provided are not the same.');
+      throw new BadRequestException('The passwords entered are not the same.');
     }
 
     delete dto.confirmPassword;
@@ -64,7 +64,7 @@ export class UserService {
         data,
         select: this.userSelect,
       })
-      .catch(this.handleError);
+      .catch(handleError);
   }
 
   async update(id: string, dto: UpdateUserDto): Promise<User> {
@@ -72,7 +72,7 @@ export class UserService {
 
     if (dto.password) {
       if (dto.password != dto.confirmPassword) {
-        throw new BadRequestException('The passwords provided are not the same.');
+        throw new BadRequestException('The passwords entered are not the same.');
       }
     }
 
@@ -90,25 +90,12 @@ export class UserService {
         data,
         select: this.userSelect,
       })
-      .catch(this.handleError);
+      .catch(handleError);
   }
 
   async delete(id: string) {
     await this.findById(id);
 
     await this.prisma.user.delete({ where: { id } });
-  }
-
-  handleError(error: Error): undefined {
-    const errorLines = error.message?.split('\n');
-    const lastErrorLine = errorLines[errorLines.length - 1]?.trim();
-
-    if (!lastErrorLine) {
-      console.error(error);
-    }
-
-    throw new UnprocessableEntityException(
-      lastErrorLine || 'An error occurred while performing the operation',
-    );
   }
 }
