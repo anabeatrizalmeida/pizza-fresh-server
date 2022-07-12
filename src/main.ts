@@ -6,9 +6,7 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-
   app.useGlobalPipes(new ValidationPipe());
-
 
   const config = new DocumentBuilder()
     .setTitle('PizzaFresh')
@@ -18,6 +16,7 @@ async function bootstrap() {
     .addTag('table')
     .addTag('product')
     .addTag('user')
+    .addTag('order')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
